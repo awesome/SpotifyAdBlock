@@ -15,6 +15,7 @@ namespace SpotifyAdBlock
     {
         public static bool HideForm = true;
         public static int ProcessID;
+        public static float OriginalVolume;
         public frmMain()
         {
             InitializeComponent();
@@ -51,16 +52,24 @@ namespace SpotifyAdBlock
             {
                 ProcessID = processes[0].Id;
             }
-            bool? mute = SoundControl.GetApplicationMute((uint)processes[0].Id);
-            if (processes[0].MainWindowTitle.Contains("Spotify - Spotify –") && mute == false)
+            float? volume = SoundControl.GetApplicationVolume((uint) processes[0].Id);
+            //bool? mute = SoundControl.GetApplicationMute((uint)processes[0].Id);
+            if (volume == null) return;
+            bool mute = volume == 0f;
+            if (processes[0].MainWindowTitle.Contains("Spotify - Spotify –") && !mute)
             {
-                SoundControl.SetApplicationMute((uint)processes[0].Id, true);
+                //SoundControl.SetApplicationMute((uint)processes[0].Id, true);
+                OriginalVolume = (float)volume;
+                SoundControl.SetApplicationVolume((uint)processes[0].Id, 0f);
                 lblStatus.Text = "Ad detected, muting.";
+                notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Muting Spotify, ad detected.", ToolTipIcon.None);
             }
-            else if (!processes[0].MainWindowTitle.Contains("Spotify - Spotify -") && mute == true)
+            else if (!processes[0].MainWindowTitle.Contains("Spotify - Spotify -") && mute)
             {
-                SoundControl.SetApplicationMute((uint)processes[0].Id, false);
+                //SoundControl.SetApplicationMute((uint)processes[0].Id, false);
+                SoundControl.SetApplicationVolume((uint)processes[0].Id, OriginalVolume);
                 lblStatus.Text = "Ad not detected.";
+                notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Ad no longer detected, unmuting Spotify.", ToolTipIcon.None);
             }
         }
 
@@ -366,6 +375,27 @@ namespace SpotifyAdBlock
 
             bool mute;
             volume.GetMute(out mute);
+            return mute;
+        }
+
+        public static void SetApplicationVolume(uint name, float volum)
+        {
+            ISimpleAudioVolume volume = GetVolumeObject(name);
+            if (volume == null)
+                return;
+
+            Guid guid = Guid.Empty;
+            volume.SetMasterVolume(volum, ref guid);
+        }
+
+        public static float? GetApplicationVolume(uint name)
+        {
+            ISimpleAudioVolume volume = GetVolumeObject(name);
+            if (volume == null)
+                return null;
+
+            float mute;
+            volume.GetMasterVolume(out mute);
             return mute;
         }
     }
