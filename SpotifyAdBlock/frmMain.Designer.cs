@@ -36,6 +36,7 @@
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.ctxNotifyIcon = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetVolumeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxNotifyIcon.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -73,17 +74,25 @@
             // ctxNotifyIcon
             // 
             this.ctxNotifyIcon.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.resetVolumeToolStripMenuItem,
             this.closeToolStripMenuItem});
             this.ctxNotifyIcon.Name = "ctxNotifyIcon";
-            this.ctxNotifyIcon.Size = new System.Drawing.Size(104, 26);
+            this.ctxNotifyIcon.Size = new System.Drawing.Size(153, 70);
             this.ctxNotifyIcon.Text = "Spotify Ad Blocker";
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
+            // 
+            // resetVolumeToolStripMenuItem
+            // 
+            this.resetVolumeToolStripMenuItem.Name = "resetVolumeToolStripMenuItem";
+            this.resetVolumeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.resetVolumeToolStripMenuItem.Text = "Reset Volume";
+            this.resetVolumeToolStripMenuItem.Click += new System.EventHandler(this.resetVolumeToolStripMenuItem_Click);
             // 
             // frmMain
             // 
@@ -112,6 +121,7 @@
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.ContextMenuStrip ctxNotifyIcon;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resetVolumeToolStripMenuItem;
     }
 }
 

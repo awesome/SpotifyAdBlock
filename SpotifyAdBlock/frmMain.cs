@@ -23,6 +23,8 @@ namespace SpotifyAdBlock
             InitializeComponent();
         }
 
+
+        #region Form Events
         private void frmMain_Load(object sender, EventArgs e)
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT || Environment.OSVersion.Version.Major < 6)
@@ -40,6 +42,26 @@ namespace SpotifyAdBlock
             this.Show();
         }
 
+        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void resetVolumeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SoundControl.SetApplicationVolume((uint)ProcessID, OriginalVolume);
+            notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Resetting volume to original...", ToolTipIcon.None);
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason != CloseReason.FormOwnerClosing && e.CloseReason != CloseReason.UserClosing) return;
+            this.Hide();
+            e.Cancel = true;
+        }
+
+        #endregion
+
         private void timerScanAd_Tick(object sender, EventArgs e)
         {
             if (HideForm)
@@ -54,7 +76,7 @@ namespace SpotifyAdBlock
             {
                 ProcessID = processes[0].Id;
             }
-            float? volume = SoundControl.GetApplicationVolume((uint) processes[0].Id);
+            float? volume = SoundControl.GetApplicationVolume((uint)ProcessID);
             if (volume == null) return;
             bool mute = volume <= (1f/100f);
             var title = processes[0].MainWindowTitle;
@@ -65,7 +87,7 @@ namespace SpotifyAdBlock
             if (adstatus && !mute)
             {
                 OriginalVolume = (float)volume;
-                SoundControl.SetApplicationVolume((uint)processes[0].Id, 1f / 1000f);
+                SoundControl.SetApplicationVolume((uint)ProcessID, 1f / 1000f);
                 //Force a play after volume is set as Spotify will stop the ad.
                 PostMessage(processes[0].MainWindowHandle, 0x319, IntPtr.Zero, new IntPtr(0xE0000L));
                 lblStatus.Text = "Ad detected, muting.";
@@ -75,22 +97,10 @@ namespace SpotifyAdBlock
             {
                 if (OriginalVolume == 0f)
                     OriginalVolume = 1f;
-                SoundControl.SetApplicationVolume((uint)processes[0].Id, OriginalVolume);
+                SoundControl.SetApplicationVolume((uint)ProcessID, OriginalVolume);
                 lblStatus.Text = "Ad not detected.";
                 notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Ad no longer detected, unmuting Spotify.", ToolTipIcon.None);
             }
-        }
-
-        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
-        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason != CloseReason.FormOwnerClosing && e.CloseReason != CloseReason.UserClosing) return;
-            this.Hide();
-            e.Cancel = true;
         }
 
         private bool CheckSongIsAd(string artist, string song)
