@@ -14,6 +14,10 @@ namespace SpotifyAdBlock
         public static bool HideForm = true;
         public static int ProcessID;
         public static float OriginalVolume = 0f;
+
+        [DllImport("user32.dll")]
+        internal static extern int PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
         public frmMain()
         {
             InitializeComponent();
@@ -62,6 +66,8 @@ namespace SpotifyAdBlock
             {
                 OriginalVolume = (float)volume;
                 SoundControl.SetApplicationVolume((uint)processes[0].Id, 1f / 1000f);
+                //Force a play after volume is set as Spotify will stop the ad.
+                PostMessage(processes[0].MainWindowHandle, 0x319, IntPtr.Zero, new IntPtr(0xE0000L));
                 lblStatus.Text = "Ad detected, muting.";
                 notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Muting Spotify, ad detected.", ToolTipIcon.None);
             }
@@ -89,6 +95,7 @@ namespace SpotifyAdBlock
 
         private bool CheckSongIsAd(string artist, string song)
         {
+            //I'm assuming since we are blocking ads on free accounts, there will be an internet connection.
             var wc = new WebClient() {Proxy = null};
             try
             {
