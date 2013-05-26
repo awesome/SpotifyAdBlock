@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Text.RegularExpressions;
+using System.Web;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
@@ -88,9 +90,10 @@ namespace SpotifyAdBlock
             var wc = new WebClient() {Proxy = null};
             try
             {
-                var uri = WebUtility.HtmlEncode(string.Format("http://ws.spotify.com/search/1/track.json?q={0}+{1}",
-                                                              artist.Replace(' ', '+'), song.Replace(' ', '+')));
-                var response = wc.DownloadString(uri);
+                var uri = ("http://ws.spotify.com/search/1/track.json?q=" +
+                           HttpUtility.UrlEncode(String.Format("{0} {1}",
+                                                               artist, song)));
+                var response = Regex.Unescape(wc.DownloadString(uri));
                 return
                     !(response.Contains(string.Format("\"name\": \"{0}\"", artist)) &&
                       response.Contains(string.Format("\"name\": \"{0}\"", song)));
