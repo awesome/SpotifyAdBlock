@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.Net;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
@@ -53,20 +49,22 @@ namespace SpotifyAdBlock
                 ProcessID = processes[0].Id;
             }
             float? volume = SoundControl.GetApplicationVolume((uint) processes[0].Id);
-            //bool? mute = SoundControl.GetApplicationMute((uint)processes[0].Id);
             if (volume == null) return;
-            bool mute = volume == 0f;
-            if (processes[0].MainWindowTitle.Contains("Spotify - Spotify –") && !mute)
+            bool mute = volume <= (1f/100f);
+            var title = processes[0].MainWindowTitle;
+            var data = title.Split(new[] {" - "}, StringSplitOptions.RemoveEmptyEntries);
+            if (data.Length == 1) return;
+            var songdata = string.Join(" - ", data, 1, data.Length - 1).Split(new[] { " – " }, StringSplitOptions.RemoveEmptyEntries);
+            var adstatus = CheckSongIsAd(songdata[0], songdata[1]);
+            if (adstatus && !mute)
             {
-                //SoundControl.SetApplicationMute((uint)processes[0].Id, true);
                 OriginalVolume = (float)volume;
-                SoundControl.SetApplicationVolume((uint)processes[0].Id, 0f);
+                SoundControl.SetApplicationVolume((uint)processes[0].Id, 1f / 100f);
                 lblStatus.Text = "Ad detected, muting.";
                 notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Muting Spotify, ad detected.", ToolTipIcon.None);
             }
-            else if (!processes[0].MainWindowTitle.Contains("Spotify - Spotify -") && mute)
+            else if (!adstatus && mute)
             {
-                //SoundControl.SetApplicationMute((uint)processes[0].Id, false);
                 SoundControl.SetApplicationVolume((uint)processes[0].Id, OriginalVolume);
                 lblStatus.Text = "Ad not detected.";
                 notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Ad no longer detected, unmuting Spotify.", ToolTipIcon.None);
@@ -83,6 +81,24 @@ namespace SpotifyAdBlock
             if (e.CloseReason != CloseReason.FormOwnerClosing && e.CloseReason != CloseReason.UserClosing) return;
             this.Hide();
             e.Cancel = true;
+        }
+
+        private bool CheckSongIsAd(string artist, string song)
+        {
+            var wc = new WebClient() {Proxy = null};
+            try
+            {
+                var uri = WebUtility.HtmlEncode(string.Format("http://ws.spotify.com/search/1/track.json?q={0}+{1}",
+                                                              artist.Replace(' ', '+'), song.Replace(' ', '+')));
+                var response = wc.DownloadString(uri);
+                return
+                    !(response.Contains(string.Format("\"name\": \"{0}\"", artist)) &&
+                      response.Contains(string.Format("\"name\": \"{0}\"", song)));
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
     }
 
