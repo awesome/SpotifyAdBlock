@@ -13,7 +13,7 @@ namespace SpotifyAdBlock
     {
         public static bool HideForm = true;
         public static int ProcessID;
-        public static float OriginalVolume;
+        public static float OriginalVolume = 0f;
         public frmMain()
         {
             InitializeComponent();
@@ -67,6 +67,8 @@ namespace SpotifyAdBlock
             }
             else if (!adstatus && mute)
             {
+                if (OriginalVolume == 0f)
+                    OriginalVolume = 1f;
                 SoundControl.SetApplicationVolume((uint)processes[0].Id, OriginalVolume);
                 lblStatus.Text = "Ad not detected.";
                 notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Ad no longer detected, unmuting Spotify.", ToolTipIcon.None);
