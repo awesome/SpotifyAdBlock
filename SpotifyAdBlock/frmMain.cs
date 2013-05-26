@@ -55,7 +55,7 @@ namespace SpotifyAdBlock
             bool mute = volume <= (1f/100f);
             var title = processes[0].MainWindowTitle;
             var data = title.Split(new[] {" - "}, StringSplitOptions.RemoveEmptyEntries);
-            if (data.Length == 1) return;
+            if (data.Length <= 1) return;
             var songdata = string.Join(" - ", data, 1, data.Length - 1).Split(new[] { " – " }, StringSplitOptions.RemoveEmptyEntries);
             var adstatus = CheckSongIsAd(songdata[0], songdata[1]);
             if (adstatus && !mute)
