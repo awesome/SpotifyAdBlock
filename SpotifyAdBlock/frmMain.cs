@@ -61,7 +61,7 @@ namespace SpotifyAdBlock
             if (adstatus && !mute)
             {
                 OriginalVolume = (float)volume;
-                SoundControl.SetApplicationVolume((uint)processes[0].Id, 1f / 100f);
+                SoundControl.SetApplicationVolume((uint)processes[0].Id, 1f / 1000f);
                 lblStatus.Text = "Ad detected, muting.";
                 notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Muting Spotify, ad detected.", ToolTipIcon.None);
             }
