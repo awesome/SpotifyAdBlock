@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
@@ -88,10 +89,11 @@ namespace SpotifyAdBlock
             {
                 OriginalVolume = (float)volume;
                 SoundControl.SetApplicationVolume((uint)ProcessID, 1f / 1000f);
+                Thread.Sleep(100);
                 //Force a play after volume is set as Spotify will stop the ad.
                 PostMessage(processes[0].MainWindowHandle, 0x319, IntPtr.Zero, new IntPtr(0xE0000L));
                 lblStatus.Text = "Ad detected, muting.";
-                notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Muting Spotify, ad detected.", ToolTipIcon.None);
+                notifyIcon.ShowBalloonTip(200, "Spotify Ad Blocker", "Muting Spotify, ad detected.", ToolTipIcon.None);
             }
             else if (!adstatus && mute)
             {
@@ -99,7 +101,7 @@ namespace SpotifyAdBlock
                     OriginalVolume = 1f;
                 SoundControl.SetApplicationVolume((uint)ProcessID, OriginalVolume);
                 lblStatus.Text = "Ad not detected.";
-                notifyIcon.ShowBalloonTip(1000, "Spotify Ad Blocker", "Ad no longer detected, unmuting Spotify.", ToolTipIcon.None);
+                notifyIcon.ShowBalloonTip(200, "Spotify Ad Blocker", "Ad no longer detected, unmuting Spotify.", ToolTipIcon.None);
             }
         }
 
